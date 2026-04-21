@@ -48,7 +48,10 @@ export default async function Leaderboard({
       {flashMatchId && <MatchToast matchId={flashMatchId} />}
       <header className="mb-8 flex items-end justify-between">
         <div>
-          <h1 className="text-2xl font-medium tracking-tight">Leaderboard</h1>
+          <p className="text-xs uppercase tracking-wider text-neutral-500">
+            Vanderlande&apos;s foosball season FY27
+          </p>
+          <h1 className="mt-1 text-2xl font-medium tracking-tight">Leaderboard</h1>
           <p className="mt-1 text-sm text-neutral-500">
             Ranked by current rating. Starts at 1200.
           </p>

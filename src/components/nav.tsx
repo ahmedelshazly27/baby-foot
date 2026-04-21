@@ -13,7 +13,7 @@ export function Nav() {
   return (
     <nav className="mb-10 flex flex-wrap items-baseline justify-between gap-y-2 border-b border-neutral-200 pb-5">
       <Link href="/" className="text-sm font-medium tracking-tight">
-        foosball.elo
+        Vanderlande · FY27
       </Link>
       <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm">
         {LINKS.slice(1).map((l) => (

@@ -15,8 +15,8 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Foosball ELO",
-  description: "Department foosball rating ladder",
+  title: "Vanderlande's foosball season FY27",
+  description: "Vanderlande's foosball season FY27 — ELO ladder",
 };
 
 export default function RootLayout({
