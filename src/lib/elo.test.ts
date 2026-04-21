@@ -181,6 +181,25 @@ describe("applyMatch — margin multiplier", () => {
   });
 });
 
+describe("RATING_SYSTEM.md worked example", () => {
+  it("Alex+Blair beat Casey+Dana 10-4 with the documented deltas", () => {
+    const states = stateMap(
+      mk("alex", { rating: 1320, games_played: 40 }),
+      mk("blair", { rating: 1280, games_played: 25 }),
+      mk("casey", { rating: 1150, games_played: 8 }),
+      mk("dana", { rating: 1210, games_played: 12 }),
+    );
+    const { deltaA, deltaB } = applyMatch(states, {
+      teamA: ["alex", "blair"],
+      teamB: ["casey", "dana"],
+      scoreA: 10,
+      scoreB: 4,
+    });
+    expect(round2(deltaA)).toBe(5.42);
+    expect(round2(deltaB)).toBe(-8.67);
+  });
+});
+
 describe("rebuildFromZero — multi-match sequence", () => {
   it("replays two matches and lands on the expected ratings and records", () => {
     const alice = "alice", bob = "bob", carol = "carol", dave = "dave";

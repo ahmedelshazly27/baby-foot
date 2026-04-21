@@ -1,36 +1,76 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Foosball ELO
 
-## Getting Started
+A small internal web app for logging 2v2 foosball matches and tracking
+individual ELO ratings. Next.js 14 + Supabase + Tailwind.
 
-First, run the development server:
+## Setup
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
+cp .env.local.example .env.local
+# fill in NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY,
+# SUPABASE_SERVICE_ROLE_KEY
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Apply the database migration
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Supabase JS doesn't expose raw SQL, so the schema is applied once by hand:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Open the [Supabase SQL Editor](https://supabase.com/dashboard/project/_/sql)
+   for your project.
+2. Paste the contents of `supabase/migrations/0001_init.sql` and run it.
 
-## Learn More
+The migration is idempotent; re-running it is safe.
 
-To learn more about Next.js, take a look at the following resources:
+### Seed the database
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+pnpm seed
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Inserts six players and fifteen matches so the leaderboard isn't empty on
+first load. Wipes existing rows first, so don't run this against real data.
 
-## Deploy on Vercel
+### Develop
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+pnpm dev      # http://localhost:3000
+pnpm test     # vitest
+pnpm build    # production build
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## How it works
+
+- **Rating engine** (`src/lib/elo.ts`) is a pure function. No I/O, no globals.
+  It takes the current player states and a match input, returns updated states
+  and per-player history rows. Unit-tested in `src/lib/elo.test.ts`.
+- **Rebuild** (`src/lib/rebuild.ts`) replays every match from the start. Called
+  after back-dated inserts, edits, and deletes so the rating trail is never
+  mutated in place.
+- **Server Actions** own every write. The service-role client is only used on
+  the server; `NEXT_PUBLIC_SUPABASE_ANON_KEY` is used for read-only queries.
+- **No auth in v1.** Every write action has a `// TODO: Supabase magic-link
+  auth` marker where the session check will eventually live.
+
+## Pages
+
+| Route                | What lives there                                                 |
+|----------------------|-------------------------------------------------------------------|
+| `/`                  | Leaderboard, ranked by rating. `?inactive=1` shows inactive too. |
+| `/matches/new`       | Log a new match. Redirects to `/?match=<id>` with a delta toast. |
+| `/players/new`       | Add a player. Name only. Starts at 1200.                         |
+| `/players/[id]`      | Profile: rating, rank, record, sparkline, last 20 matches.       |
+| `/matches`           | History. Edit + delete actions rebuild downstream ratings.       |
+| `/matches/[id]/edit` | Edit form. Save replays every subsequent match.                  |
+
+## Design notes
+
+- Monochrome only. Positive deltas show as `+X.XX`, negatives as `−X.XX`, both
+  in the same grey.
+- Inter for UI, JetBrains Mono for every number (ratings, scores, deltas, dates).
+- Max content width 960px. Desktop-first.
+
+## Rating math
+
+See [`RATING_SYSTEM.md`](./RATING_SYSTEM.md) for the human-readable explanation
+of how individual ELO is computed from 2v2 matches.
