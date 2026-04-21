@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { Nav } from "@/components/nav";
+import { MatchToast } from "@/components/match-toast";
 import { getReadClient } from "@/lib/supabase/server";
 import { formatRating } from "@/lib/format";
 import type { Player } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
-type Search = { inactive?: string };
+type Search = { inactive?: string; match?: string };
 
 export default async function Leaderboard({
   searchParams,
@@ -14,6 +15,7 @@ export default async function Leaderboard({
   searchParams: Search;
 }) {
   const includeInactive = searchParams?.inactive === "1";
+  const flashMatchId = searchParams?.match;
   const supabase = getReadClient();
   const query = supabase
     .from("players")
@@ -29,6 +31,7 @@ export default async function Leaderboard({
   return (
     <>
       <Nav />
+      {flashMatchId && <MatchToast matchId={flashMatchId} />}
       <header className="mb-8 flex items-end justify-between">
         <div>
           <h1 className="text-2xl font-medium tracking-tight">Leaderboard</h1>
