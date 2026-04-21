@@ -8,7 +8,6 @@ import {
   rebuildFromZero,
   round1,
   round2,
-  STARTING_RATING,
   type MatchInput,
   type PlayerState,
 } from "./elo";
