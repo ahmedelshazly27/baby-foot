@@ -16,6 +16,7 @@ node_modules
 # production
 /build
 dist
+dist-artifacts
 
 # misc
 .DS_Store
