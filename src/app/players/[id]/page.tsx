@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Nav } from "@/components/nav";
 import { RatingSparkline } from "@/components/rating-sparkline";
+import { SetupNeeded, isSchemaMissing } from "@/components/setup-needed";
 import { getReadClient } from "@/lib/supabase/server";
 import { formatDate, formatDelta, formatRating } from "@/lib/format";
 import type { Match, Player, RatingHistoryRow } from "@/lib/types";
@@ -76,7 +77,17 @@ export default async function PlayerPage({ params }: { params: { id: string } })
     .select("*")
     .eq("id", params.id)
     .maybeSingle();
-  if (pErr) throw new Error(pErr.message);
+  if (pErr) {
+    if (isSchemaMissing(pErr)) {
+      return (
+        <>
+          <Nav />
+          <SetupNeeded />
+        </>
+      );
+    }
+    throw new Error(pErr.message);
+  }
   if (!player) notFound();
   const p = player as Player;
 

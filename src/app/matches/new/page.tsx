@@ -1,12 +1,27 @@
 import Link from "next/link";
 import { Nav } from "@/components/nav";
+import { SetupNeeded, isSchemaMissing } from "@/components/setup-needed";
 import { listActivePlayers } from "@/lib/players";
+import type { Player } from "@/lib/types";
 import { MatchForm } from "./form";
 
 export const dynamic = "force-dynamic";
 
 export default async function NewMatchPage() {
-  const players = await listActivePlayers();
+  let players: Player[];
+  try {
+    players = await listActivePlayers();
+  } catch (e) {
+    if (isSchemaMissing(e)) {
+      return (
+        <>
+          <Nav />
+          <SetupNeeded />
+        </>
+      );
+    }
+    throw e;
+  }
   return (
     <>
       <Nav />

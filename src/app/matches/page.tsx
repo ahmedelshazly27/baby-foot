@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Nav } from "@/components/nav";
 import { DeleteMatchButton } from "@/components/delete-match-button";
+import { SetupNeeded, isSchemaMissing } from "@/components/setup-needed";
 import { getReadClient } from "@/lib/supabase/server";
 import { formatDate, formatDelta } from "@/lib/format";
 import type { Match, Player } from "@/lib/types";
@@ -22,7 +23,17 @@ export default async function HistoryPage() {
     .from("matches")
     .select("*")
     .order("played_at", { ascending: true });
-  if (error) throw new Error(error.message);
+  if (error) {
+    if (isSchemaMissing(error)) {
+      return (
+        <>
+          <Nav />
+          <SetupNeeded />
+        </>
+      );
+    }
+    throw new Error(error.message);
+  }
   const matchesAsc = (asc ?? []) as Match[];
 
   // Walk backwards: affected[i] = distinct players in match i and all later matches.

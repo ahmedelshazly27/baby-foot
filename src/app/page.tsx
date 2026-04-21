@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Nav } from "@/components/nav";
 import { MatchToast } from "@/components/match-toast";
+import { SetupNeeded, isSchemaMissing } from "@/components/setup-needed";
 import { getReadClient } from "@/lib/supabase/server";
 import { formatRating } from "@/lib/format";
 import type { Player } from "@/lib/types";
@@ -25,7 +26,17 @@ export default async function Leaderboard({
   const { data, error } = includeInactive
     ? await query
     : await query.eq("active", true);
-  if (error) throw new Error(error.message);
+  if (error) {
+    if (isSchemaMissing(error)) {
+      return (
+        <>
+          <Nav />
+          <SetupNeeded />
+        </>
+      );
+    }
+    throw new Error(error.message);
+  }
   const players = (data ?? []) as Player[];
 
   return (
