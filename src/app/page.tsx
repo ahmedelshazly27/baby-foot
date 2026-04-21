@@ -2,8 +2,10 @@ import Link from "next/link";
 import { Nav } from "@/components/nav";
 import { MatchToast } from "@/components/match-toast";
 import { SetupNeeded, isSchemaMissing } from "@/components/setup-needed";
+import { FormStrip } from "@/components/form-strip";
 import { getReadClient } from "@/lib/supabase/server";
 import { formatRating } from "@/lib/format";
+import { getRecentForm } from "@/lib/stats";
 import type { Player } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -38,6 +40,7 @@ export default async function Leaderboard({
     throw new Error(error.message);
   }
   const players = (data ?? []) as Player[];
+  const form = players.length ? await getRecentForm(supabase, 5) : {};
 
   return (
     <>
@@ -69,6 +72,7 @@ export default async function Leaderboard({
               <th className="text-right">Rating</th>
               <th className="text-right">W&ndash;L</th>
               <th className="text-right">Games</th>
+              <th className="text-right">Form</th>
             </tr>
           </thead>
           <tbody>
@@ -88,10 +92,22 @@ export default async function Leaderboard({
                   {p.wins}&ndash;{p.losses}
                 </td>
                 <td className="text-right font-mono text-neutral-500">{p.games_played}</td>
+                <td>
+                  <div className="flex justify-end">
+                    <FormStrip entries={form[p.id] ?? []} />
+                  </div>
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
+      )}
+
+      {players.length > 0 && (
+        <p className="mt-6 text-xs text-neutral-500">
+          Form shows the last 5 matches — filled = win, empty = loss. Newest on
+          the right.
+        </p>
       )}
     </>
   );
