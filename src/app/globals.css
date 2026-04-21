@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --paper: #fafafa;
+  --ink: #0a0a0a;
+}
+
+html,
+body {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+@layer base {
+  table {
+    @apply w-full border-collapse text-left;
+  }
+  th {
+    @apply text-xs font-medium uppercase tracking-wider text-neutral-500 pb-3 border-b border-neutral-200;
+  }
+  td {
+    @apply py-3 border-b border-neutral-200 align-middle;
+  }
+  input,
+  select,
+  button {
+    @apply bg-paper;
+  }
+}
